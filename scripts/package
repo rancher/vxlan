@@ -3,18 +3,10 @@ set -e
 
 source $(dirname $0)/version
 
-ARCH=${ARCH:?"ARCH not set"}
-SUFFIX=""
-[ "${ARCH}" != "amd64" ] && SUFFIX="_${ARCH}"
+cd $(dirname $0)/..
 
-cd $(dirname $0)/../package
+mkdir -p dist/artifacts
+cd bin/
+tar cvzf ../dist/artifacts/rancher-vxlan-${ARCH}-${VERSION}.tar.gz .
 
-TAG=${TAG:-${VERSION}${SUFFIX}}
-REPO=${REPO:-rancher}
-
-cp ../bin/rancher-vxlan .
-
-IMAGE=${REPO}/vxlan:${TAG}
-docker build -t ${IMAGE} .
-echo ${IMAGE} > ../dist/images
-echo Built ${IMAGE}
+echo "Built rancher-vxlan-${ARCH}-${VERSION}.tar.gz"
