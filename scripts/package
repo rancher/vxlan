@@ -5,8 +5,14 @@ source $(dirname $0)/version
 
 cd $(dirname $0)/..
 
-mkdir -p dist/artifacts
-cd bin/
+mkdir -p dist/artifacts rootfs
+cd rootfs
+
+mkdir -p usr/bin
+
+cp ../package/start-vxlan.sh usr/bin/start-vxlan.sh
+cp ../bin/rancher-vxlan usr/bin/rancher-vxlan
+
 tar cvzf ../dist/artifacts/rancher-vxlan-${ARCH}-${VERSION}.tar.gz .
 
 echo "Built rancher-vxlan-${ARCH}-${VERSION}.tar.gz"
