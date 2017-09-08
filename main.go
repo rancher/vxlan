@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/leodotcloud/log"
 	"github.com/rancher/vxlan/server"
 	"github.com/rancher/vxlan/vxlan"
 	"github.com/urfave/cli"
@@ -20,8 +20,9 @@ func main() {
 	app.Version = VERSION
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "listen",
-			Value: ":8111",
+			Name:   "listen",
+			Value:  "localhost:8111",
+			EnvVar: "RANCHER_SERVICE_LISTEN_PORT",
 		},
 		cli.BoolFlag{
 			Name:   "debug, d",
@@ -50,7 +51,8 @@ func main() {
 	}
 	app.Action = func(ctx *cli.Context) {
 		if err := appMain(ctx); err != nil {
-			logrus.Fatal(err)
+			log.Errorf("error: %v", err)
+			os.Exit(1)
 		}
 	}
 
@@ -59,7 +61,7 @@ func main() {
 
 func appMain(ctx *cli.Context) error {
 	if ctx.Bool("debug") {
-		logrus.SetLevel(logrus.DebugLevel)
+		log.SetLevelString("debug")
 	}
 
 	done := make(chan error)
@@ -82,7 +84,7 @@ func appMain(ctx *cli.Context) error {
 	}
 
 	listenPort := ctx.String("listen")
-	logrus.Debugf("About to start server and listen on port: %v", listenPort)
+	log.Debugf("About to start server and listen on port: %v", listenPort)
 	go func() {
 		s := server.Server{V: v}
 		done <- s.ListenAndServe(listenPort)

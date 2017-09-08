@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/leodotcloud/log"
 	"github.com/rancher/vxlan/vxlan"
 )
 
@@ -19,21 +19,21 @@ func (s *Server) ListenAndServe(listen string) error {
 	http.HandleFunc("/ping", s.ping)
 	http.HandleFunc("/v1/reload", s.reload)
 	http.HandleFunc("/v1/loglevel", s.loglevel)
-	logrus.Infof("Listening on %s", listen)
+	log.Infof("Listening on %s", listen)
 	err := http.ListenAndServe(listen, nil)
 	if err != nil {
-		logrus.Errorf("got error while ListenAndServe: %v", err)
+		log.Errorf("got error while ListenAndServe: %v", err)
 	}
 	return err
 }
 
 func (s *Server) ping(rw http.ResponseWriter, req *http.Request) {
-	logrus.Debug("Received ping request")
+	log.Debugf("Received ping request")
 	rw.Write([]byte("OK"))
 }
 
 func (s *Server) reload(rw http.ResponseWriter, req *http.Request) {
-	logrus.Debug("Received reload request")
+	log.Debugf("Received reload request")
 	msg := "Reloaded Configuration\n"
 	if err := s.V.Reload(); err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
@@ -45,10 +45,10 @@ func (s *Server) reload(rw http.ResponseWriter, req *http.Request) {
 
 func (s *Server) loglevel(rw http.ResponseWriter, req *http.Request) {
 	// curl -X POST -d "level=debug" localhost:8111/v1/loglevel
-	logrus.Debug("Received loglevel request")
+	log.Debugf("Received loglevel request")
 	if req.Method == http.MethodGet {
-		level := logrus.GetLevel().String()
-		rw.Write([]byte(fmt.Sprintf("loglevel: %s\n", level)))
+		level := log.GetLevel().String()
+		rw.Write([]byte(fmt.Sprintf("%s\n", level)))
 	}
 
 	if req.Method == http.MethodPost {
@@ -56,13 +56,12 @@ func (s *Server) loglevel(rw http.ResponseWriter, req *http.Request) {
 			rw.WriteHeader(http.StatusInternalServerError)
 			rw.Write([]byte(fmt.Sprintf("Failed to parse form: %v\n", err)))
 		}
-		level, err := logrus.ParseLevel(req.Form.Get("level"))
+		err := log.SetLevelString(req.Form.Get("level"))
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
-			rw.Write([]byte(fmt.Sprintf("Failed to parse loglevel: %v\n", err)))
+			rw.Write([]byte(fmt.Sprintf("Failed to set loglevel: %v\n", err)))
 		} else {
-			logrus.SetLevel(level)
-			rw.Write([]byte("OK"))
+			rw.Write([]byte("OK\n"))
 		}
 	}
 }

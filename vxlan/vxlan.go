@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/leodotcloud/log"
 	"github.com/pkg/errors"
 	"github.com/rancher/go-rancher-metadata/metadata"
 	"github.com/vishvananda/netlink"
@@ -55,6 +55,7 @@ func NewVxlan(metadataAddress string) (*Vxlan, error) {
 
 // Start is used to start the vxlan overlay
 func (o *Vxlan) Start() error {
+	log.Infof("vxlan: Start")
 	err := o.configure()
 	if err != nil {
 		return errors.Wrap(err, "Failed to start vxlan")
@@ -66,12 +67,12 @@ func (o *Vxlan) Start() error {
 
 func (o *Vxlan) onChangeNoError(version string) {
 	if err := o.Reload(); err != nil {
-		logrus.Errorf("Failed to apply vxlan rules: %v", err)
+		log.Errorf("Failed to apply vxlan rules: %v", err)
 	}
 }
 
 func (o *Vxlan) Reload() error {
-	logrus.Debug("vxlan: Reload")
+	log.Debugf("vxlan: Reload")
 	err := o.configure()
 	if err != nil {
 		err = errors.Wrap(err, "Failed to reload vxlan")
@@ -80,7 +81,7 @@ func (o *Vxlan) Reload() error {
 }
 
 func (o *Vxlan) configure() error {
-	logrus.Debug("vxlan: configure")
+	log.Debugf("vxlan: configure")
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
@@ -127,7 +128,7 @@ func (o *Vxlan) configure() error {
 		ip := net.ParseIP(h.AgentIP)
 		peerMAC, err := getMACAddressForVxlanIP(vxlanMACRange, ip)
 		if err != nil {
-			logrus.Errorf("Failed to ParseMAC in peersHosts: %v", err)
+			log.Errorf("Failed to ParseMAC in peersHosts: %v", err)
 			continue
 		}
 
@@ -156,7 +157,7 @@ func (o *Vxlan) configure() error {
 		peerIP := net.ParseIP(peersHostMap[c.HostUUID])
 		peerMAC, err := getMACAddressForVxlanIP(vxlanMACRange, peerIP)
 		if err != nil {
-			logrus.Errorf("Failed to ParseMAC in nonPeersContainers: %v", err)
+			log.Errorf("Failed to ParseMAC in nonPeersContainers: %v", err)
 			continue
 		}
 
@@ -195,7 +196,7 @@ func (o *Vxlan) configure() error {
 // getMyVTEPInfo is used to figure out the MAC address to be assigned
 // for the VTEP address.
 func (o *Vxlan) getMyVTEPInfo() (net.HardwareAddr, error) {
-	logrus.Debug("vxlan: GetMyVTEPInfo")
+	log.Debugf("vxlan: GetMyVTEPInfo")
 
 	selfHost, err := o.m.GetSelfHost()
 	if err != nil {
@@ -209,12 +210,12 @@ func (o *Vxlan) getMyVTEPInfo() (net.HardwareAddr, error) {
 		return nil, err
 	}
 
-	logrus.Debugf("vxlan: my vtep info mac:%v", mac)
+	log.Debugf("vxlan: my vtep info mac:%v", mac)
 	return mac, nil
 }
 
 func (o *Vxlan) SetDefaultVxlanInterfaceInfo() error {
-	logrus.Debugf("vxlan: SetDefaultVxlanInterfaceInfo")
+	log.Debugf("vxlan: SetDefaultVxlanInterfaceInfo")
 	mac, err := o.getMyVTEPInfo()
 	if err != nil {
 		return err
@@ -233,22 +234,23 @@ func (o *Vxlan) SetDefaultVxlanInterfaceInfo() error {
 
 // createVTEP creates a vxlan interface with the default values
 func (o *Vxlan) createVTEP() error {
-	logrus.Debugf("vxlan: trying to create vtep: %v", o.v)
+	log.Debugf("vxlan: trying to create vtep: %v", o.v)
 	err := createVxlanInterface(o.v)
 	if err != nil {
 		// The errors are really mysterious, hence
 		// documenting the ones I came across.
 		// invalid argument:
 		//   Could mean there is another interface with similar properties.
-		logrus.Errorf("Error creating vxlan interface v=%v: err=%v", o.v, err)
+		log.Errorf("Error creating vxlan interface v=%v: err=%v", o.v, err)
 		return err
 	}
 
+	log.Infof("vxlan: successfully created interface %v", o.v)
 	return nil
 }
 
 func (o *Vxlan) checkAndCreateVTEP() error {
-	logrus.Debugf("vxlan: checkAndCreateVTEP")
+	log.Debugf("vxlan: checkAndCreateVTEP")
 
 	l, err := findVxlanInterface(o.v.name)
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/leodotcloud/log"
 	"github.com/vishvananda/netlink"
 )
 
@@ -22,7 +22,7 @@ type vxlanIntfInfo struct {
 }
 
 func createVxlanInterface(v *vxlanIntfInfo) error {
-	logrus.Debugf("vxlan: creating interface %+v", v)
+	log.Debugf("vxlan: creating interface %+v", v)
 
 	vxlan := &netlink.Vxlan{
 		LinkAttrs: netlink.LinkAttrs{Name: v.name, MTU: v.mtu},
@@ -50,7 +50,7 @@ func createVxlanInterface(v *vxlanIntfInfo) error {
 	for retries > 0 {
 		err = netlink.LinkSetUp(vxlan)
 		if err != nil {
-			logrus.Debugf("setting link up got error: %v", err)
+			log.Debugf("setting link up got error: %v", err)
 		} else {
 			linkUpSuccessful = true
 			break
@@ -60,7 +60,7 @@ func createVxlanInterface(v *vxlanIntfInfo) error {
 	}
 
 	if !linkUpSuccessful {
-		logrus.Errorf("Couldn't set link up got error: %v", err)
+		log.Errorf("Couldn't set link up got error: %v", err)
 		return err
 	}
 
@@ -68,16 +68,16 @@ func createVxlanInterface(v *vxlanIntfInfo) error {
 }
 
 func deleteVxlanInterface(name string) error {
-	logrus.Debugf("vxlan: deleting interface %v", name)
+	log.Debugf("vxlan: deleting interface %v", name)
 
 	link, err := netlink.LinkByName(name)
 	if err != nil {
-		logrus.Errorf("vxlan: failed to find interface with name %s: %v", name, err)
+		log.Errorf("vxlan: failed to find interface with name %s: %v", name, err)
 		return err
 	}
 
 	if err := netlink.LinkDel(link); err != nil {
-		logrus.Errorf("vxlan: error deleting interface with name %s: %v", name, err)
+		log.Errorf("vxlan: error deleting interface with name %s: %v", name, err)
 		return err
 	}
 
