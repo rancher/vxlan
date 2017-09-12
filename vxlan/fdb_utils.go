@@ -18,8 +18,10 @@ func getCurrentFDBEntries(link netlink.Link) (map[string]*netlink.Neigh, error) 
 
 	fdbEntries := make(map[string]*netlink.Neigh)
 	for index, n := range neighs {
-		log.Debugf("getCurrentFDBEntries: Neigh %+v", n)
-		fdbEntries[n.IP.To4().String()] = &neighs[index]
+		if n.IP != nil {
+			log.Debugf("getCurrentFDBEntries: Neigh %+v", n)
+			fdbEntries[n.IP.To4().String()] = &neighs[index]
+		}
 	}
 
 	log.Debugf("getCurrentFDBEntries: fdbEntries %v", fdbEntries)
