@@ -9,6 +9,7 @@ import (
 	"github.com/leodotcloud/log"
 	"github.com/pkg/errors"
 	"github.com/rancher/go-rancher-metadata/metadata"
+	"github.com/rancher/vxlan/utils"
 	"github.com/vishvananda/netlink"
 )
 
@@ -145,7 +146,7 @@ func (o *Vxlan) configure() error {
 			c.PrimaryIp == "" ||
 			c.NetworkFromContainerUUID != "" ||
 			c.HostUUID == selfHost.UUID ||
-			!(c.State == "running" || c.State == "starting") {
+			!utils.IsContainerConsideredRunning(c) {
 			continue
 		}
 
