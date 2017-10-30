@@ -21,7 +21,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "listen",
-			Value:  "localhost:8111",
+			Value:  "127.0.0.1:8111",
 			EnvVar: "RANCHER_SERVICE_LISTEN_PORT",
 		},
 		cli.BoolFlag{
