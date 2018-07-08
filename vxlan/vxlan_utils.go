@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/leodotcloud/log"
+	"github.com/rancher/log"
 	"github.com/vishvananda/netlink"
 )
 

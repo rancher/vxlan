@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/leodotcloud/log"
+	"github.com/rancher/log"
 	"github.com/rancher/vxlan/server"
 	"github.com/rancher/vxlan/vxlan"
 	"github.com/urfave/cli"
