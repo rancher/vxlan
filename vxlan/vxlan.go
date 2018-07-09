@@ -6,9 +6,9 @@ import (
 	"net"
 	"sync"
 
-	"github.com/leodotcloud/log"
 	"github.com/pkg/errors"
 	"github.com/rancher/go-rancher-metadata/metadata"
+	"github.com/rancher/log"
 	"github.com/rancher/vxlan/utils"
 	"github.com/vishvananda/netlink"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/leodotcloud/log"
+	"github.com/rancher/log"
 	"github.com/rancher/vxlan/vxlan"
 )
 
